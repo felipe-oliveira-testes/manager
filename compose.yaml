@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  app:
+    build: ./
+    ports:
+      - "8080:${APP_PORT}"
+    hostname: ${APP_HOST}
+    environment:
+      - DB_PORT=${DB_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - EMAIL_FROM_EMAIL=${EMAIL_FROM_EMAIL}
+      - EMAIL_FROM_PASSWORD=${EMAIL_FROM_PASSWORD}
+      - EMAIL_SMTP_AUTH=${EMAIL_SMTP_AUTH}
+      - EMAIL_SMTP_TTL=${EMAIL_SMTP_TTL}
+      - EMAIL_SMTP_HOST=${EMAIL_SMTP_HOST}
+      - EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    build: ./database/
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    hostname: ${DB_HOST}
+    user: ${DB_USER}
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
